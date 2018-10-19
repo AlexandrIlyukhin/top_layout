@@ -48,8 +48,13 @@ const startCalendar = {
     dayClicks: [
         {
             monthId: 201802,
-            day: 15,
+            day: 1,
             color: '#ff9797'
+        },
+        {
+            monthId: 201802,
+            day: 9,
+            color: '#39e639'
         },
         {
             monthId: 201803,
@@ -59,7 +64,7 @@ const startCalendar = {
         {
             monthId: 201804,
             day: 4,
-            color: '#fcd116'
+            color: '#39e639'
         },
 
     ]
@@ -105,6 +110,7 @@ function displaySaveUrl(uniqId) {
         return
     }
     const newUrl = window.location.href + '?id=' + uniqId;
+
     window.history.replaceState(null, null, newUrl);
     document.querySelector('.inputtext').innerHTML = newUrl;
 }
@@ -120,18 +126,35 @@ function saveСhangorg() {
 const createSingleMonths = (monthInfoData, templateMonth) => {
     templateMonth.setAttribute('data-month-id', monthInfoData.id);
     templateMonth.querySelector('.monthname').innerHTML = monthInfoData.name;
+
     let arrDays = templateMonth.querySelectorAll('.table-calendar .daymonth');//получаем массив ячеек для дат
+    const days = data.colorDays;
     let dayNumber = 0;
-
-    for (let i = 0; i < monthInfoData.days.length; i++) {// для каждой недели
-        const currentWeek = monthInfoData.days[i];
-        for (let j = 0; j < currentWeek.length; j++) {// для каждого дня недели
-
-            arrDays[dayNumber].innerHTML = currentWeek[j];
-            dayNumber = dayNumber + 1;
-        }
+    let clickList = {};
+    //достать все клики за этот месяц
+    days.forEach(singleClick => {
+    if (singleClick.monthId === monthInfoData.id){
+        clickList[singleClick.day] = singleClick.color;
     }
-    return templateMonth; //DOM Node
+    });
+
+    monthInfoData.days.forEach(week => {
+        week.forEach(day => {
+
+            if (day > 0){
+                arrDays[dayNumber].innerHTML = day;
+                if (clickList[day] !== undefined){
+                    $(arrDays[dayNumber]).css('background',clickList[day])
+                }
+            }
+            else {
+                arrDays[dayNumber].innerHTML = '';
+            }
+            dayNumber = ++dayNumber;
+        });
+
+    });
+     return templateMonth; //DOM Node
 };
 
 const deleteMonth = (event) => {
@@ -159,7 +182,7 @@ function generateMonths(monthList = data.month) {
     monthList.forEach((item, index) => {
         const singelMonths = createSingleMonths(item, monthTemplate.cloneNode(true)); //Функция собирает карточку на месяца на основании Шаблона и Информации
         $(singelMonths).find('.fa').on('click', deleteMonth);
-        //singelMonths.addEventListener('click', deleteMonth); //TODO 38.52
+        //singelMonths.addEventListener('click', deleteMonth);
         monthContainer.appendChild(singelMonths);
 
     });
@@ -281,10 +304,8 @@ $('.table-calendar .daymonth').on('click', (event) => {
         day: day,
         color: getActualColor()
     };
-
     startCalendar.dayClicks.push(dayClick);
     $(event.target).css('background', getActualColor());
-
 });
 
 $('.table-calendar .daymonth').on('contextmenu', (event) => {
